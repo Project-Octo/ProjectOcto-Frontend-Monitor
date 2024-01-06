@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  octo-monitor-frontend-development:
+    build:
+      context: ../../
+      dockerfile: docker/development/Dockerfile
+    image: octo-monitor-frontend-development
+    ports:
+      - '3001:3000'
