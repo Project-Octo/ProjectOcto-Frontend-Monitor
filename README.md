@@ -1,1 +1,1 @@
-# octo-monitor-frontend
+# Project Octo Monitoring Platform Frontend
