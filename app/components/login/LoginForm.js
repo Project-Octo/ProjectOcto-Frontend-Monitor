@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useContext } from 'react';
 // @mui
 import {
 	Link,
@@ -19,6 +19,10 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import { UserAuth } from '@/app/context/AuthContext';
 
+// Context
+import { CountryContext } from '@/app/context/CountryContext';
+import { CountrySpecies } from '@/app/context/CountrySpecies';
+
 // ----------------------------------------------------------------------
 
 export default function LoginForm() {
@@ -26,11 +30,22 @@ export default function LoginForm() {
 	const passwordRef = useRef();
 
 	const { user, googleSignIn } = UserAuth();
+	const { country, setCountry } = useContext(CountryContext);
+	const { speciesByCountry, setSpeciesByCountry } = useContext(CountryContext);
 
 	const handleGoogleSignIn = async (e) => {
 		try {
 			// if success, redirect to dashboard
-			await googleSignIn();
+			await googleSignIn()
+				.then((res) => {
+					console.log('res:', res);
+					// setCountry(res.country);
+					// setSpeciesByCountry(res.speciesByCountry);
+				})
+				.then(() => {
+					redirect('/dashboard');
+				});
+
 			redirect('/dashboard');
 		} catch (err) {
 			console.log(err);
@@ -47,14 +62,6 @@ export default function LoginForm() {
 	};
 
 	const [showPassword, setShowPassword] = useState(false);
-
-	const handleGoogleLogin = async () => {
-		try {
-			await googleSignIn();
-		} catch (err) {
-			console.log(err);
-		}
-	};
 
 	return (
 		<form onSubmit={handleLogin}>

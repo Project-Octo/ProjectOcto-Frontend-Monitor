@@ -10,12 +10,14 @@ import { DrawerContext } from '../context/DrawerContext';
 import { db, auth } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { CountryContext } from '../context/CountryContext';
+import { CountrySpecies } from '../context/CountrySpecies';
 
 export default function Home() {
 	const { open, setOpen } = useContext(DrawerContext);
 	const [userUid, setUserUid] = useState('');
-	const [userData, setUserData] = useState({});
+	const [userData, setUserData] = useState('');
 	const { updateCountry } = useContext(CountryContext);
+	const { updateCountrySpecies } = useContext(CountrySpecies);
 
 	useEffect(() => {
 		// from db get user data using uid from auth
@@ -31,9 +33,9 @@ export default function Home() {
 				.then((doc) => {
 					if (doc.exists()) {
 						setUserData(doc.data());
-						if (doc.data().region) {
-							updateCountry(JSON.parse(doc.data().region));
-						}
+						// if user data has region, update country context
+						updateCountry(doc.data().country);
+						updateCountrySpecies(doc.data().speciesByCountry);
 					} else {
 						// doc.data() will be undefined in this case
 						console.log('No such document!');
@@ -45,12 +47,21 @@ export default function Home() {
 		});
 	}, []);
 
+	if (!userData) {
+		return (
+			<>
+				<h1>Wildlife Tracker</h1>
+				<p>Loading...</p>
+			</>
+		);
+	}
+
 	return (
 		<>
 			<APIProvider apiKey={'AIzaSyCY3SURcElSavfbmvnZrSfWQQLC87if5ak'}>
 				{/* { if userData doesnt have region, show Modal } */}
-				{!userData.region && <DashboardModal userUid={userUid} />}
-				<MapDrawer open={open} setOpen={setOpen} />
+				{!userData.country && <DashboardModal userUid={userUid} />}
+				<MapDrawer open={open} setOpen={setOpen} userUid={userUid} />
 				<Maps />
 			</APIProvider>
 		</>

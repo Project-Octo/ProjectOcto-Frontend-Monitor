@@ -3,19 +3,22 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
+const additionalUserInfo = {
+	setting: {
+		endangeredShow: true,
+		protectedShow: true,
+	},
+};
+
 export const onNewUser = functions
 	.region('asia-northeast3')
 	.auth.user()
 	.onCreate((user) => {
-		db.collection('Users')
-			.doc(user.uid)
-			.set(JSON.parse(JSON.stringify(user)));
+		const { uid, email, displayName, photoURL } = user;
+		return db.collection('Users').doc(uid).set({
+			email,
+			displayName,
+			photoURL,
+			additionalUserInfo,
+		});
 	});
-
-export const saveLocation = functions.region('asia-northeast3').https.onCall((data, context) => {
-    return db
-        .collection('Users')
-        .doc(context.auth?.uid)
-        .collection('Locations')
-        .add(data);
-});
